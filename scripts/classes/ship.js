@@ -13,11 +13,13 @@ var Ship = DrawableElement.extend({
 		
 		this.onShipHit = options.onShipHit || function(){};
 		
-		this.MOVE_FACTOR = 5;
+		this.MOVE_FACTOR = 0.2;
+		this.SHOOT_TIME = 500;
 	
 		this.brickSize = 2;
 		this.shootImage = null;
 		this.shoots = [];
+		this.lastShoot = 0;
 	
 		this.imgs = [];
 		
@@ -47,24 +49,34 @@ var Ship = DrawableElement.extend({
 		
 		this.imgs = ImageCreator.getImages(opts);
 	},
-	update: function(actions){
+	update: function(actions, dt){
 		var vel = this.MOVE_FACTOR;
 	
 		if (actions.indexOf(Controls.Left)>-1){
 			if (this.position.x > this.maxMove.left){
-				this.position.x -= vel;
+				this.position.x -= vel * dt;
 			}
 		}
 		else if (actions.indexOf(Controls.Right)>-1) { 
 			if (this.position.x < (this.maxMove.right - this.size.width)){
-				this.position.x += vel;
+				this.position.x += vel * dt;
 			}
 		}
-		
+
+		this.lastShoot -= dt;
 		var shootIdx = actions.indexOf(Controls.Shoot);
-		if (shootIdx>-1 && this.shoots.length === 0){
-	       	actions.splice(shootIdx, 1);
-	       	this.makeShoot();
+		if (shootIdx>-1 && this.lastShoot <= 0){
+			this.lastShoot = this.SHOOT_TIME;
+			actions.splice(shootIdx, 1);
+			this.makeShoot();
+		}
+	
+		var s = this.shoots;
+		var sLen = s.length;
+		for(var i=0; i< sLen; i++){
+			if (s[i]){
+				s[i].update(dt);
+			}
 		}
 	},
 	draw: function(){
@@ -73,7 +85,9 @@ var Ship = DrawableElement.extend({
 		var s = this.shoots;
 		var sLen = s.length;
 		for(var i=0; i< sLen; i++){
-			s[i].draw();
+			if (s[i]){
+				s[i].draw();
+			}
 		}
 	},
 	collided: function(){
@@ -97,8 +111,8 @@ var Ship = DrawableElement.extend({
 		this._super();
 	},
 	makeShoot: function(){
-        var self = this;
-        
+    var self = this;
+
 		var s = new Shoot({
 			ctx: this.ctx,
 			x: this.position.x + (this.size.width /2),
@@ -118,7 +132,7 @@ var Ship = DrawableElement.extend({
 		});
 		
 		this.shoots.push(s);
-		s.update();
+		//s.update();
 	},
 	buildShootImage: function(){
 		var map = ImageMapper.ShipShoot(),

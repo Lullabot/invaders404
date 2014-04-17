@@ -46,6 +46,10 @@ var Alien = DrawableElement.extend({
 		var sY = this.position.y + this.size.height*0.8;
 		
 		function checkCollision(arr){
+			if (!arr){
+				return false;
+			}
+			
 			var cb = arr;
 			var cbLen = cb.length;
 			
@@ -71,6 +75,7 @@ var Alien = DrawableElement.extend({
 	},
 	collided: function(){
 		this.destroyed = true;
+		window.particles.create([this.position.x + this.size.width/2, this.position.y + this.size.height/2], 10, this.color);
 	},
 	destroy: function(){
 		this._super();

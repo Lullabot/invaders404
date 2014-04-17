@@ -19,7 +19,7 @@ var Shoot = DrawableElement.extend({
 	build: function(){
 		
 	},
-	loop: function(){
+	update: function(dt){
 		var dir = this.dir;
 		var vel = this.MOVE_FACTOR;
 		
@@ -29,11 +29,6 @@ var Shoot = DrawableElement.extend({
 			this.collided();
 			return;
 		}
-	},
-	update: function(){
-		clearInterval(this.timer);
-		var self = this;
-		this.timer = setInterval(function(){ self.loop(); }, 20);
 	},
 	draw: function(){
 		this._super(this.shootImage);
@@ -55,12 +50,14 @@ var Shoot = DrawableElement.extend({
 		var sX = this.position.x;
 		var sY = this.position.y;
 		
-		//TODO: check shoot with
-		
 		if (sY < 0 || sY > 400)
 			return true;
 			
 		function checkCollision(arr){
+			if (!arr){
+				return false;
+			}
+			
 			var cb = arr;
 			var cbLen = cb.length;
 			

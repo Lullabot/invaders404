@@ -12,7 +12,7 @@ var Brick = DrawableElement.extend({
 	build: function(){
 		
 	},
-	update: function(){
+	update: function(dt){
 		
 	},
 	draw: function(){

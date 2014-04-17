@@ -42,15 +42,24 @@ var Shield = DrawableElement.extend({
 			}
 		}
 	},
-	update: function(){
+	update: function(dt){
+		var b = this.bricks;
+		var bLen = b.length;
 		
+		for(var i=0; i< bLen; i++){
+			if (b[i]){
+				b[i].update(dt);
+			}
+		}
 	},
 	draw: function(){
 		var b = this.bricks;
 		var bLen = b.length;
 		
 		for(var i=0; i< bLen; i++){
-			b[i].draw();
+			if (b[i]){
+				b[i].draw();
+			}
 		}
 	},
 	destroy: function(){

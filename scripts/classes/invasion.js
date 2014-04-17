@@ -5,6 +5,11 @@
 var Invasion = DrawableElement.extend({
 	init: function(options){
 		this._super(options);
+
+		this.colors = {
+			crab: '#D0392A',
+			squid: '#379aff'
+		};
 		
 		this.size = {
 			width: 390,
@@ -18,6 +23,9 @@ var Invasion = DrawableElement.extend({
 		this.DOWN_FACTOR = 12;
 		this.CURR_VEL = 600;
 		this.VEL_FACTOR = 50;
+
+		this.MOVE_TIME = 500;
+		this.lastMove = 0;
 		
 		this.dir = 1;
 		this.lastDir = 1;
@@ -43,7 +51,7 @@ var Invasion = DrawableElement.extend({
 		this.onAliensClean = options.onAliensClean || function(){};
 		
 		this.timer = null;
-		this.update();
+		//this.update();
 	},
 	build: function(){
 		var self = this;
@@ -90,9 +98,11 @@ var Invasion = DrawableElement.extend({
 					switch(aliensArr[i][j]){
 						case 1:
 							opts.stateImgs = this.crabImages;
+							opts.color = this.colors.crab;
 							break;
 						case 2:
 							opts.stateImgs = this.squidImages;
+							opts.color = this.colors.squid;
 							break;
 					}
 					
@@ -113,7 +123,6 @@ var Invasion = DrawableElement.extend({
 		var arrLen = arr.length;
 		
 		if (arrLen === 0){
-			clearInterval(this.timer);
 			this.onAliensClean();
 		}
 		
@@ -130,20 +139,22 @@ var Invasion = DrawableElement.extend({
 		this.position.x += hMove;
 		this.position.y += vMove;
 		
-		var shooterIdx = Math.floor(Math.random()*arrLen);
-		
 		var shoot = false;
-		if (this.state && Math.floor(Math.random()*2))
+		if (this.state && Math.floor(Math.random()*2)) {
 			shoot = true;
-		
+
+			shooterIdx = [];
+			for (var i=0; i<2; i++){
+				shooterIdx.push(Math.floor(Math.random()*arrLen));
+			}
+		}
+
 		for(var i=0; i< arrLen; i++){
 			arr[i].position.x += hMove;
 			arr[i].position.y += vMove;
 			
-			if (shoot && shooterIdx === i)
+			if (shoot && shooterIdx.indexOf(i) > -1)
 				this.makeShoot(arr[i]);
-			
-			arr[i].update();
 		}
 		
 		if (this.vMove > 0) this.vMove = 0;
@@ -151,15 +162,35 @@ var Invasion = DrawableElement.extend({
 		var cPer = (arrLen * 100) / this.aliensAmm;
 		if((this.lastPer - cPer) > 9){
 			this.CURR_VEL -= this.VEL_FACTOR;
+			this.MOVE_TIME -= this.VEL_FACTOR;
 			this.lastPer = cPer;
-			this.update();
 			return;
 		}
 	},
-	update: function(){
-		clearInterval(this.timer);
-		var self = this;
-		this.timer = setInterval(function(){ self.loop(); }, this.CURR_VEL);
+	update: function(dt){
+		this.lastMove -= dt;
+
+		if (this.lastMove <= 0){
+			this.loop();
+			this.lastMove = this.MOVE_TIME;
+
+			var state = this.state;
+		
+			var arr = this.aliens;
+			var arrLen = arr.length;
+			for(var i=0; i< arrLen; i++){
+				if (arr[i] !== undefined)
+					arr[i].update(dt);
+			}
+		}
+		
+		var shoots = this.shoots;
+		var shootsLen = shoots.length;
+		for(var i=0; i< shootsLen; i++){
+			if (shoots[i]){
+				shoots[i].update(dt);
+			}
+		}
 	},
 	draw: function(){
 		var state = this.state;
@@ -215,7 +246,7 @@ var Invasion = DrawableElement.extend({
 		});
 		
 		this.shoots.push(s);
-		s.update();
+		//s.update();
 	},
 	buildShootImage: function(){
 		var map = ImageMapper.AlienShoot(),
@@ -229,7 +260,7 @@ var Invasion = DrawableElement.extend({
 			states: [1],
 			brickSize: brickSize,
 			mapper: map,
-			color: '#fff'
+			color: 'yellow'
 		};
 		
 		this.shootImage = ImageCreator.getImages(opts)[0];
@@ -249,11 +280,11 @@ var Invasion = DrawableElement.extend({
 		opts.states = [2,3];
 		
 		opts.mapper = ImageMapper.AlienCrab();
-		opts.color = '#ff2727'; //red
+		opts.color = this.colors.crab;
 		this.crabImages = ImageCreator.getImages(opts);
 		
 		opts.mapper = ImageMapper.AlienSquid();
-		opts.color = '#f8ff41'; //yellow
+		opts.color = this.colors.squid;
 		this.squidImages = ImageCreator.getImages(opts);
 	}
 });

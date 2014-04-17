@@ -22,6 +22,9 @@ var ShieldBrick = DrawableElement.extend({
 	   }
 	},
 	collided: function(full){
+
+		window.particles.create([this.position.x + this.size.width/2, this.position.y + this.size.height/2], 4, this.color);
+
 		if (full) this.state = 3;
 		else this.state++;
 

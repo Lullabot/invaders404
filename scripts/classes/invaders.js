@@ -2,12 +2,6 @@
  * @author pjnovas
  */
 
-/* TODO:
-
-- fix the removeEventListener
-
- */
-
 var Invaders404 = Class.extend({
 	init : function(options) {
 		this.canvas = null;
@@ -20,14 +14,15 @@ var Invaders404 = Class.extend({
 		this.ship = {};
 		this.invasion = {};
 
-		this.initCanvas();
+		this.initCanvas(options.canvasId);
 		
 		this.onLoose = options.onLoose || function(){};
 		this.onWin = options.onWin || function(){};
 
 		this.isOnGame = false;
 
-		
+		this.boundGameRun = this.gameRun.bind(this);
+
 		/* FPS Info */
 		this.fps = 0
 		this.now = null;
@@ -41,13 +36,18 @@ var Invaders404 = Class.extend({
 		}, 1000);
 		/* End FPS Info */
 	},
-	initCanvas : function() {
-		this.canvas = document.getElementById('canvas');
+	initCanvas : function(canvasId) {
+		this.canvas = document.getElementById(canvasId || 'canvas');
 		this.ctx = this.canvas.getContext('2d');
+		window.particles.init(this.ctx, { w: this.canvas.width, h: this.canvas.height });
 	},
 	start : function() {
 		this.build();
-		this.loop();
+		this.gameRun();
+	},
+	gameRun: function(){
+		if (window.gameTime.tick()) { this.loop(); }
+	  this.tLoop = window.requestAnimationFrame(this.boundGameRun);
 	},
 	build : function() {
 		var self = this;
@@ -96,19 +96,16 @@ var Invaders404 = Class.extend({
 		this.bindControls();
 	},
 	loop : function() {
-		this.update();
-		this.draw();
-
-		if(this.isOnGame) {
-			var self = this;
-			setTimeout(function() {
-				self.loop();
-			}, self.loopInterval);
+		if (this.isOnGame){
+			this.update(window.gameTime.frameTime);
+			this.draw();
 		}
 	},
-	update : function() {
-		this.shield.update();
-		this.ship.update(this.currentDir);
+	update : function(dt) {
+		this.shield.update(dt);
+		this.ship.update(this.currentDir, dt);
+		this.invasion.update(dt);
+		window.particles.update(dt);
 	},
 	draw : function() {
 		this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
@@ -116,6 +113,7 @@ var Invaders404 = Class.extend({
 		this.shield.draw();
 		this.ship.draw();
 		this.invasion.draw();
+		window.particles.draw();
 
 		/* FPS Info */
 		var thisFrameFPS = 1000 / ((this.now = new Date) - this.lastUpdate);
@@ -139,45 +137,6 @@ var Invaders404 = Class.extend({
 
 			return null;
 		}
-		
-		function setGamePadAction() {
-			var keysPressed = [];
-			
-			if (gamepad.buttons.A_Button || gamepad.buttons.X_Button || 
-				gamepad.buttons.B_Button || gamepad.buttons.Y_Button)
-				keysPressed.push(Controls.Shoot);
-				
-			if (gamepad.axes.Left_Stick_X || gamepad.axes.Pad_Left)
-				keysPressed.push(Controls.Left);
-				
-			if (gamepad.axes.Right_Stick_X || gamepad.axes.Pad_Right)
-				keysPressed.push(Controls.Right);
-
-			for(var i=0; i< keysPressed.length; i++){
-				if(self.currentDir.indexOf(keysPressed[i]) === -1)
-					self.currentDir.push(keysPressed[i]);
-			}
-		}
-		
-		window.addEventListener("MozGamepadAxisMove", setGamePadAction , false);
-		window.addEventListener("MozGamepadButtonDown", setGamePadAction , false);
-		window.addEventListener("MozGamepadButtonUp", function(){
-			var pos = -1;
-			
-			if (!gamepad.axes.Left_Stick_X && !gamepad.axes.Pad_Left){
-				pos = self.currentDir.indexOf(Controls.Left);
-				if(pos > -1) self.currentDir.splice(pos, 1);
-			}
-			
-			if (!gamepad.axes.Right_Stick_X && !gamepad.axes.Pad_Right){
-				pos = self.currentDir.indexOf(Controls.Right);
-				if(pos > -1) self.currentDir.splice(pos, 1);
-			}
-					
-		} , false);
-		
-		
-		/* REMOVE FOR FAKE GAMEPAD */
 		
 		document.addEventListener('keydown', function(event) {
 			if(self.isOnGame) {
@@ -206,14 +165,10 @@ var Invaders404 = Class.extend({
 					self.currentDir.splice(pos, 1);
 			}
 		});
-		
-		/* END REMOVE FOR FAKE GAMEPAD */
 	},
 	unbindControls : function(params) {
-		document.removeEventListener('keydown', function() {
-		});
-		document.removeEventListener('keyup', function() {
-		});
+		document.removeEventListener('keydown', function() {});
+		document.removeEventListener('keyup', function() {});
 	},
 	destroy : function() {
 		this.shield.destroy();
