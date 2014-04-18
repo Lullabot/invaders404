@@ -2,7 +2,7 @@
  * @author pjnovas
  */
 
-var Invaders404 = Class.extend({
+var Game = Class.extend({
   init : function(options) {
     this.canvas = null;
     this.ctx = null;

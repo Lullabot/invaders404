@@ -24,9 +24,11 @@
         <script type="text/javascript" src="scripts/classes/shield.js"></script>
         <script type="text/javascript" src="scripts/classes/invaders.js"></script>
         
-        <!--<script type="text/javascript" src="invaders404.min.js"></script>-->
-        
         <script type="text/javascript" src="scripts/classes/input.js"></script>
+
+        
+        <!--<script type="text/javascript" src="game.js"></script>-->
+        <!--<script type="text/javascript" src="game.min.js"></script>-->
 
         <script type="text/javascript">
             var invaders;
@@ -42,7 +44,7 @@
             }
             
             function initInvaders404(){
-                invaders = new Invaders404({
+                invaders = new Game({
                     canvasId: "game-canvas",
                     onLoose: restart,
                     onWin: restart
