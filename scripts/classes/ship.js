@@ -14,7 +14,7 @@ var Ship = DrawableElement.extend({
 		this.onShipHit = options.onShipHit || function(){};
 		
 		this.MOVE_FACTOR = 0.2;
-		this.SHOOT_TIME = 500;
+		this.SHOOT_TIME = 400;
 	
 		this.brickSize = 2;
 		this.shootImage = null;

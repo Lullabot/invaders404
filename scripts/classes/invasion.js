@@ -163,6 +163,9 @@ var Invasion = DrawableElement.extend({
 		if((this.lastPer - cPer) > 9){
 			this.CURR_VEL -= this.VEL_FACTOR;
 			this.MOVE_TIME -= this.VEL_FACTOR;
+			if (this.MOVE_TIME < 200){
+				this.MOVE_TIME = 200;
+			}
 			this.lastPer = cPer;
 			return;
 		}

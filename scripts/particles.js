@@ -21,6 +21,7 @@ window.particles = (function(){
     init: function(_ctx, _size){
       ctx = _ctx;
       size = _size;
+      pars = [];
     },
     create: function(pos, qty, color){
       for (var i=0; i < qty; i++){

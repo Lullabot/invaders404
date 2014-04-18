@@ -25,10 +25,10 @@ var ShieldBrick = DrawableElement.extend({
 
 		window.particles.create([this.position.x + this.size.width/2, this.position.y + this.size.height/2], 4, this.color);
 
-		if (full) this.state = 3;
+		if (full) this.state = Math.floor((Math.random()*3)+2);
 		else this.state++;
 
-		if (this.state > 2){
+		if (this.state > 1){
 			this.destroyed = true;
 		}	
 	},
